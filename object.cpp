@@ -8,7 +8,7 @@ Object::Object(float x, float y, float width, float height)
 Object::~Object() {}
 
 void Object::Update() {
-    // 更新对象逻辑
+
 }
 
 void Object::Render(SDL_Renderer* render) {
@@ -19,10 +19,6 @@ void Object::Render(SDL_Renderer* render) {
     SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);//混合模式
     SDL_SetRenderDrawColor(render, 255, 0, 0, 100);//透明度100
     SDL_RenderDrawRect(render, &rect);
-}
-
-void Object::Move()
-{
 }
 
 bool Object::CheckCollision(const Object& other) {

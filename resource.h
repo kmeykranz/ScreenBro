@@ -6,6 +6,7 @@
 #define ACCELERATION 30.0
 
 #include "SDL.h"
+#include "SDL_image.h"
 
 enum State {
     IDLE,

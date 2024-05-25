@@ -15,8 +15,8 @@ private:
 	bool running;
 	SDL_Window* win;
 	SDL_Renderer* render;
+
 	Player* player;
 	const Uint8* keyboard_state_array;
-	int x, y;
 };
 
