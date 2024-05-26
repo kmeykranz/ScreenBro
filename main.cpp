@@ -1,16 +1,32 @@
-﻿#include "game.h"
+﻿#include "scene_manager.h"
+#include "game_scene.h"
+#include "menu_scene.h"
+#include "window.h"
+
+Window *window;
+
+Scene* menu_scene = nullptr;
+Scene* game_scene = nullptr;
+
+SceneManager scene_manager;
 
 int main(int, char**) {
-	Game game;
-	game.Init();
-	while (game.IsRunning())
+	window = new Window();
+	window->on_create();
+
+	menu_scene = new MenuScene(window);
+	game_scene = new GameScene(window);
+
+	scene_manager.set_current_scene(menu_scene);
+
+	while (scene_manager.is_running())
 	{
 		//控制帧率
 		uint32_t begin = SDL_GetTicks();//获取开始的时间
 
-		game.Events();
-		game.Loop();
-		game.Render();
+		scene_manager.on_input();
+		scene_manager.on_update();
+		scene_manager.on_draw();
 
 		long current = SDL_GetTicks();//结束时间
 		long cost = begin - current;//前面耗费的时间
@@ -20,6 +36,11 @@ int main(int, char**) {
 			SDL_Delay(delay);
 		}
 	}
-	game.Clean();
+
+	//释放
+	window->on_destroy();
+	delete menu_scene;
+	delete game_scene;
+
 	return 0;
 }
