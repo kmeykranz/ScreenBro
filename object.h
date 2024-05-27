@@ -1,5 +1,5 @@
 #pragma once
-#include "resource.h"
+#include "constant.h"
 #include "window.h"
 
 //对象基类
@@ -14,24 +14,26 @@ public:
     Object() = default;
     ~Object()=default;
 
-    bool CheckCollision(const Object& other) {
-        // 简单的矩形碰撞检测
-        if (m_x < other.m_x + other.m_width &&
-            m_x + m_width > other.m_x &&
-            m_y < other.m_y + other.m_height &&
-            m_y + m_height > other.m_y) {
-            return true; // 发生碰撞
-        }
-        return false; // 未发生碰撞
-    }
+    // 矩形碰撞检测
+    //bool CheckCollision(const Object& other) {
+    //    
+    //    if (position.x < other.position.x + other.m_width &&
+    //        position.x + m_width > other.position.x &&
+    //        position.y < other.position.y + other.m_height &&
+    //        position.y + m_height > other.position.y) {
+    //        return true; // 发生碰撞
+    //    }
+    //    return false; // 未发生碰撞
+    //}
 
-    //---------状态机----------
+    //设置状态
     void SetCurrentState(State state) {
         transition_state(current_state, state);
         current_state = state;
         state_time = 0.0f;
     }
 
+    //状态机循环
     void PhysicsProcess(float delta) {
         while (true) {
             State next = get_next_state(current_state);
@@ -46,8 +48,6 @@ public:
     }
 
 protected:
-    float m_x=50;
-    float m_y=50;
     float m_width=50;
     float m_height=50;
 

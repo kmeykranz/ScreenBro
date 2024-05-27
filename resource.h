@@ -1,9 +1,20 @@
 #pragma once
-#define FRAMERATE 60.0
-#define WINDOW_WIDTH 600
-#define WINDOW_HEIGHT 400
-#define SPEED 8.0
-#define ACCELERATION 30.0
+#include "constant.h"
+#include "window.h"
 
-#include "SDL.h"
-#include "SDL_image.h"
+SDL_Texture *img_player=nullptr;
+
+void resource_load(Window* win) {
+	if (!IMG_Init(IMG_INIT_PNG)) {
+		SDL_Log("Cannot init img,%s", SDL_GetError());
+		return;
+	}
+	//Íæ¼ÒÍ¼Ïñ
+	img_player=IMG_LoadTexture(win->get_render(), "resource/blue.png");
+	if (img_player == NULL) {SDL_Log("Cannot load img_player,%s", SDL_GetError());}
+}
+
+void resource_destroy() {
+	SDL_DestroyTexture(img_player);
+	IMG_Quit();
+}

@@ -6,7 +6,7 @@ extern SceneManager scene_manager;
 
 class MenuScene :public Scene {
 public:
-	MenuScene(Window *win) { window = win; };
+	MenuScene(Window* win) :window(win) {}
 	~MenuScene() = default;
 
 	void on_enter() {
@@ -43,7 +43,11 @@ public:
 		}
 	};
 	void on_exit() {
+		return;
 	};
+	void on_destroy() {
+		delete this;
+	}
 private:
 	Window* window = nullptr;
 };

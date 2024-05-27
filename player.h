@@ -1,6 +1,9 @@
 #pragma once
-#include "resource.h"
+#include "constant.h"
 #include "object.h"
+#include "vector2.h"
+
+extern SDL_Texture* img_player;
 
 class Player : public Object
 {
@@ -10,18 +13,11 @@ public:
 
 	void on_create(){
 		SetCurrentState(State::IDLE);
-		SDL_SetWindowPosition(window->get_window(), win_x, win_y);
-		//玩家图像
-		texture = IMG_LoadTexture(window->get_render(), "resource/blue.png");
-		if (texture == NULL) {
-			SDL_Log("Cannot load texture,%s", SDL_GetError());
-		}
-		m_width = 50, m_height = 50;
 	}
 
-	void on_exit()
+	void on_destroy()
 	{
-		SDL_DestroyTexture(texture);
+		delete this;
 	}
 
 	void tick_physics(State state, float delta) {
@@ -41,13 +37,13 @@ public:
 		// 这里可以添加获取下一个状态的逻辑
 		switch (current) {
 		case State::IDLE:
-			if (dir_x != 0 || dir_y != 0) {
+			if (direction.x != 0 || direction.y != 0) {
 				SDL_Log("[PLAYER] IDLE -> WALK");
 				return State::WALK;
 			}
 			break;
 		case State::WALK:
-			if (dir_x == 0 && dir_y == 0) {
+			if (direction.x == 0 && direction.y == 0) {
 				SDL_Log("[PLAYER] WALK -> IDLE");
 				return State::IDLE;
 			}
@@ -68,30 +64,27 @@ public:
 
 	void on_update()
 	{
-		rect = { (int)m_x, (int)m_y, (int)m_width, (int)m_height };
+		relevant_position=position.operator-(window->get_position());
+		rect = { (int)relevant_position.x, (int)relevant_position.y, (int)size.x, (int)size.y };
 		SDL_Point p{ 25,25 };
-		SDL_RenderCopyEx(window->get_render(), texture, NULL, &rect, angle, &p, flip);
+		SDL_RenderCopyEx(window->get_render(), img_player, NULL, &rect, angle, &p, SDL_FLIP_NONE);
 
 		//窗口移动判断
-		if (m_x + m_width / 2 > WINDOW_WIDTH) {
-			win_x += WINDOW_WIDTH;
-			m_x -= WINDOW_WIDTH;
-			SDL_SetWindowPosition(window->get_window(), win_x, win_y);
+		if (relevant_position.x + size.x / 2 > window->get_size().x) {
+			window->on_move(window->get_size().x,0);
+			window->on_update();
 		}
-		else if (m_x + m_width / 2 < 0) {
-			win_x -= WINDOW_WIDTH;
-			m_x += WINDOW_WIDTH;
-			SDL_SetWindowPosition(window->get_window(), win_x, win_y);
+		else if (relevant_position.x + size.x / 2 < 0) {
+			window->on_move(-window->get_size().x,0);
+			window->on_update();
 		}
-		if (m_y + m_height / 2 > WINDOW_HEIGHT) {
-			win_y += WINDOW_HEIGHT;
-			m_y -= WINDOW_HEIGHT;
-			SDL_SetWindowPosition(window->get_window(), win_x, win_y);
+		if (relevant_position.y + size.y / 2 > window->get_size().y) {
+			window->on_move(0, window->get_size().y);
+			window->on_update();
 		}
-		else if (m_y + m_height / 2 < 0) {
-			win_y -= WINDOW_HEIGHT;
-			m_y += WINDOW_HEIGHT;
-			SDL_SetWindowPosition(window->get_window(), win_x, win_y);
+		else if (relevant_position.y + size.y / 2 < 0) {
+			window->on_move(0, -window->get_size().y);
+			window->on_update();
 		}
 	}
 
@@ -99,63 +92,86 @@ public:
 	{
 		//加速度
 		if (speed == 0) {
-			v_x = 0;
-			v_y = 0;
+			velocity=Vector2(0,0);
 		}
-		else {
-			if (v_x < speed) {
-				v_x += ACCELERATION / FRAMERATE;
+		else{
+			if (velocity.x<speed) {
+				velocity.x += ACCELERATION / FRAMERATE;
 			}
-			if (v_y < speed) {
-				v_y += ACCELERATION / FRAMERATE;
+			if (velocity.y<speed) {
+				velocity.y += ACCELERATION / FRAMERATE;
 			}
-		}
-		//移动
-		float b_x = m_x, b_y = m_y;
-
-		if (dir_y == 1) {
-			flip = SDL_FLIP_VERTICAL;
-		}
-		else if (dir_y == -1) {
-			flip = SDL_FLIP_NONE;
 		}
 
-		if (dir_x && dir_y) {
-			m_x += dir_x * v_x * 0.707;
-			m_y += dir_y * v_y * 0.707;
-			if (dir_x == 1) angle = -45 * dir_y;
-			else angle = 45 * dir_y;
+		//面部朝向
+		if (speed) {
+			face_direction.x = direction.x;
+			face_direction.y = direction.y;
+
+			if (direction.x && direction.y) {
+				if (direction.x > 0) {
+					angle = 90 + direction.y * 45;
+				}
+				else {
+					angle = -90 - direction.y * 45;
+				}
+			}
+			else if (direction.x) {
+				angle = direction.x * 90;
+			}
+			else if (direction.y) {
+				angle = 90 + direction.y * 90;
+			}
 		}
-		else if (dir_x || dir_y) {
-			angle = 0;
-			if (dir_x == 1) { flip = SDL_FLIP_NONE; angle = 90; }
-			else if (dir_x == -1) { flip = SDL_FLIP_NONE; angle = -90; }
-			m_x += dir_x * v_x;
-			m_y += dir_y * v_y;
+
+		//原先位置（用于碰撞检测）
+		float temp_x = position.x, temp_y = position.y;
+
+		//移动计算
+		if (direction.x && direction.y) {
+			position.x += direction.x * velocity.x * 0.707;
+			position.y += direction.y * velocity.y * 0.707;
 		}
+		else if(direction.x) {
+			position.x += velocity.x*direction.x;
+		}
+		else if (direction.y) {
+			position.y += velocity.y*direction.y;
+		}
+		
 
 		//墙体碰撞
-		if (m_x + win_x > 2 * WINDOW_WIDTH || m_x + win_x < 0)m_x = b_x;
-		if (m_y + win_y > 2 * WINDOW_HEIGHT || m_y + win_y < 0)m_y = b_y;
+		if (position.x+size.x > 2 * window->get_size().x || position.x < 0)position.x = temp_x;
+		if (position.y+size.y > 2 * window->get_size().y || position.y < 0)position.y = temp_y;
 	}
 
 	void SetDirectionY(float dir)
 	{
-		dir_y = dir;
+		direction.y = dir;
 	}
 
 	void SetDirectionX(float dir)
 	{
-		dir_x = dir;
+		direction.x = dir;
+	}
+
+	Vector2 get_direction() {
+		return face_direction;
+	}
+
+	Vector2 get_position() {
+		return position;
 	}
 
 private:
-    float v_x=0, v_y=0;
-    float dir_x=0, dir_y=0;
-    float angle=0;
-    int win_x=0, win_y=0;
-	SDL_Rect rect = {0};
-    SDL_RendererFlip flip=SDL_FLIP_NONE;
+	Vector2 size=Vector2(50,50);				//玩家大小
+	Vector2 velocity = Vector2(0, 0);			//玩家速度
+	Vector2 position = Vector2(0, 0);			//玩家位置
+	Vector2 face_direction = Vector2(0, 0);		//玩家面朝方向
+	Vector2 direction = Vector2(0, 0);			//玩家移动方向
+	Vector2 relevant_position = Vector2(0, 0);	//玩家相对窗口的位置
+	float angle = 0;							//玩家图像面朝角度
+	Vector2 window_position = Vector2(0, 0);	//窗口位置
+	SDL_Rect rect = {};							
     Window *window=nullptr;
-    SDL_Texture* texture = nullptr;
 };

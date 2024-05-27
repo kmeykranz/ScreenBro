@@ -2,6 +2,7 @@
 #include "game_scene.h"
 #include "menu_scene.h"
 #include "window.h"
+#include "resource.h"
 
 Window *window;
 
@@ -13,10 +14,10 @@ SceneManager scene_manager;
 int main(int, char**) {
 	window = new Window();
 	window->on_create();
+	resource_load(window);
 
 	menu_scene = new MenuScene(window);
 	game_scene = new GameScene(window);
-
 	scene_manager.set_current_scene(menu_scene);
 
 	while (scene_manager.is_running())
@@ -38,9 +39,10 @@ int main(int, char**) {
 	}
 
 	//释放
+	resource_destroy();
+	menu_scene->on_destroy();
+	game_scene->on_destroy();
 	window->on_destroy();
-	delete menu_scene;
-	delete game_scene;
 
 	return 0;
 }

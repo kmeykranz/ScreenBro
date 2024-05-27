@@ -1,5 +1,5 @@
 #pragma once
-#include "resource.h"
+#include "constant.h"
 #include "window.h"
 
 class Scene {
@@ -12,6 +12,7 @@ public:
 	virtual void on_draw() {};
 	virtual void on_input() {};
 	virtual void on_exit() {};
+	virtual void on_destroy() {};
 
 	bool is_running() { return running; };
 protected:

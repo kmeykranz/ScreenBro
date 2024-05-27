@@ -6,7 +6,7 @@
   <ItemGroup>
     <ClInclude Include="object.h" />
     <ClInclude Include="player.h" />
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="constant.h" />
     <ClInclude Include="scene.h">
       <Filter>scene</Filter>
     </ClInclude>
@@ -20,6 +20,9 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="window.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="vector2.h" />
+    <ClInclude Include="bullet.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="scene">
