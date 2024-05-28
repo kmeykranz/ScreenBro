@@ -4,29 +4,55 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="object.h" />
-    <ClInclude Include="player.h" />
-    <ClInclude Include="constant.h" />
-    <ClInclude Include="scene.h">
+    <Filter Include="scene">
+      <UniqueIdentifier>{1e3680ff-7fbd-4cba-87c3-6eb2e8588a58}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="object">
+      <UniqueIdentifier>{152e2080-6621-4fbd-abf7-5e9966eccc7d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{18c7b8ec-b71f-49b9-a00d-e9059971b68c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="constant.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="vector2.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="window.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="bullet.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="enemy.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="object.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>object</Filter>
+    </ClInclude>
+    <ClInclude Include="game_scene.h">
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="menu_scene.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="scene.h">
+      <Filter>scene</Filter>
+    </ClInclude>
     <ClInclude Include="scene_manager.h">
       <Filter>scene</Filter>
     </ClInclude>
-    <ClInclude Include="game_scene.h">
-      <Filter>scene</Filter>
-    </ClInclude>
-    <ClInclude Include="window.h" />
-    <ClInclude Include="resource.h" />
-    <ClInclude Include="vector2.h" />
-    <ClInclude Include="bullet.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="scene">
-      <UniqueIdentifier>{1e3680ff-7fbd-4cba-87c3-6eb2e8588a58}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
 </Project>

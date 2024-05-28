@@ -19,7 +19,7 @@ public:
 	}
 	void on_update() {
 		relevant_position = position.operator-(window->get_position());
-		position.operator+=(direction.operator*(20));
+		position.operator+=(direction.operator*(20));	//20ÊÇËÙ¶È
 		rect = { (int)relevant_position.x, (int)relevant_position.y, (int)size.x, (int)size.y };
 		SDL_RenderCopy(window->get_render(), img_player, NULL, &rect);
 

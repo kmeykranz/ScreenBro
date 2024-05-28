@@ -21,20 +21,20 @@ public:
 	}
 
 	void tick_physics(State state, float delta) {
-		// 这里可以添加每个状态的物理逻辑处理
+		// 每个状态的物理逻辑处理
 		switch (state) {
 		case State::IDLE:
-			on_move(0);
+			on_move(0,delta);
 			break;
 		case State::WALK:
-			on_move(SPEED);
+			on_move(SPEED,delta);
 			on_update();
 			break;
 		}
 	}
 
 	State get_next_state(State current) {
-		// 这里可以添加获取下一个状态的逻辑
+		// 获取下一个状态的逻辑
 		switch (current) {
 		case State::IDLE:
 			if (direction.x != 0 || direction.y != 0) {
@@ -53,7 +53,7 @@ public:
 	}
 
 	void transition_state(State current, State next) {
-		// 这里可以添加状态转换逻辑:角色动画变换
+		// 状态转换逻辑:角色动画变换
 		switch (current) {
 		case State::IDLE:
 			break;
@@ -64,6 +64,7 @@ public:
 
 	void on_update()
 	{
+		//玩家显示
 		relevant_position=position.operator-(window->get_position());
 		rect = { (int)relevant_position.x, (int)relevant_position.y, (int)size.x, (int)size.y };
 		SDL_Point p{ 25,25 };
@@ -88,7 +89,7 @@ public:
 		}
 	}
 
-	void on_move(float speed)
+	void on_move(float speed,float delta)
 	{
 		//加速度
 		if (speed == 0) {
@@ -96,10 +97,10 @@ public:
 		}
 		else{
 			if (velocity.x<speed) {
-				velocity.x += ACCELERATION / FRAMERATE;
+				velocity.x += ACCELERATION*delta;
 			}
 			if (velocity.y<speed) {
-				velocity.y += ACCELERATION / FRAMERATE;
+				velocity.y += ACCELERATION*delta;
 			}
 		}
 
@@ -124,7 +125,7 @@ public:
 			}
 		}
 
-		//原先位置（用于碰撞检测）
+		//原先位置（用于墙体碰撞）
 		float temp_x = position.x, temp_y = position.y;
 
 		//移动计算
@@ -138,40 +139,43 @@ public:
 		else if (direction.y) {
 			position.y += velocity.y*direction.y;
 		}
-		
 
 		//墙体碰撞
 		if (position.x+size.x > 2 * window->get_size().x || position.x < 0)position.x = temp_x;
 		if (position.y+size.y > 2 * window->get_size().y || position.y < 0)position.y = temp_y;
 	}
 
+	//设置y移动方向
 	void SetDirectionY(float dir)
 	{
 		direction.y = dir;
 	}
 
+	//设置x移动方向
 	void SetDirectionX(float dir)
 	{
 		direction.x = dir;
 	}
 
+	//获取玩家面朝方向
 	Vector2 get_direction() {
 		return face_direction;
 	}
 
+	//获取玩家位置
 	Vector2 get_position() {
 		return position;
 	}
 
+	//设置是否可以继续射击
+	void set_can_shoot(bool val) {
+		can_shoot = val;
+	}
+
+	//获取是否可以继续射击
+	bool get_can_shoot() {
+		return can_shoot;
+	}
 private:
-	Vector2 size=Vector2(50,50);				//玩家大小
-	Vector2 velocity = Vector2(0, 0);			//玩家速度
-	Vector2 position = Vector2(0, 0);			//玩家位置
-	Vector2 face_direction = Vector2(0, 0);		//玩家面朝方向
-	Vector2 direction = Vector2(0, 0);			//玩家移动方向
-	Vector2 relevant_position = Vector2(0, 0);	//玩家相对窗口的位置
-	float angle = 0;							//玩家图像面朝角度
-	Vector2 window_position = Vector2(0, 0);	//窗口位置
-	SDL_Rect rect = {};							
-    Window *window=nullptr;
+	bool can_shoot = 1;							//是否可以射击						
 };

@@ -22,13 +22,13 @@ public:
 		int screenWidth = displayMode.w;
 		int screenHeight = displayMode.h;
 
-		size = Vector2(screenWidth/2, screenHeight/2);
+		size = Vector2((float)screenWidth/2, (float)screenHeight/2);
 
 		//´°¿Ú
 		window = SDL_CreateWindow(
-			"Game",
+			"WindowShooter",
 			position.x, position.y,
-			size.x, size.y, SDL_WINDOW_SHOWN
+			size.x, size.y, SDL_WINDOW_BORDERLESS |SDL_WINDOW_SHOWN
 		);
 		if (window == NULL) {
 			SDL_Log("Cannot create window,%s", SDL_GetError());
