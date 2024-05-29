@@ -40,6 +40,12 @@ public:
 	void on_destroy() {
 		delete this;
 	}
+
+	//获取在数组中的序号
+	int get_number() {
+		return number;
+	}
 private:
 	Window* window = nullptr;
+	int number; //在数组中的序号
 };

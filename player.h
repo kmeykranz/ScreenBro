@@ -38,13 +38,13 @@ public:
 		switch (current) {
 		case State::IDLE:
 			if (direction.x != 0 || direction.y != 0) {
-				SDL_Log("[PLAYER] IDLE -> WALK");
+				//SDL_Log("[PLAYER] IDLE -> WALK");
 				return State::WALK;
 			}
 			break;
 		case State::WALK:
 			if (direction.x == 0 && direction.y == 0) {
-				SDL_Log("[PLAYER] WALK -> IDLE");
+				//SDL_Log("[PLAYER] WALK -> IDLE");
 				return State::IDLE;
 			}
 			break;

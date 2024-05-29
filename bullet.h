@@ -8,15 +8,17 @@ extern SDL_Texture* img_player;
 
 class Bullet {
 public:
-	Bullet(Window* win) :window(win) {}
+	Bullet(Window* win,int i) :window(win), number(i)  {}
 	~Bullet() = default;
 
 	void set_position(Vector2 pos) {
 		position = pos.operator+(15);
 	}
+
 	void set_direction(Vector2 dir) {
 		direction = dir;
 	}
+
 	void on_update() {
 		relevant_position = position.operator-(window->get_position());
 		position.operator+=(direction.operator*(20));	//20是速度
@@ -35,6 +37,16 @@ public:
 		return can_remove;
 	}
 
+	//获取玩家位置
+	Vector2 get_position() {
+		return position;
+	}
+
+	//获取在数组中的序号
+	int get_number() {
+		return number;
+	}
+
 private:
 	Vector2 position = Vector2(200,200);		//子弹位置
 	Vector2 direction = Vector2(0, 0);			//子弹方向
@@ -45,4 +57,5 @@ private:
 	bool can_remove = false;
 	Window* window;
 	SDL_Rect rect = {};
+	int number=0; //在数组中的序号
 };

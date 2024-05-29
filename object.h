@@ -104,6 +104,11 @@ public:
         return position;
     }
 
+    //获取大小
+    Vector2 get_size() {
+        return size;
+    }
+
     //设置状态
     void SetCurrentState(State state) {
         transition_state(current_state, state);
