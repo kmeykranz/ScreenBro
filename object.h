@@ -11,6 +11,10 @@ public:
         WALK,
     };
 
+    enum class Axis {
+        X, Y, NONE
+    };
+
     Object() = default;
     ~Object()=default;
 
@@ -100,6 +104,11 @@ public:
     }
 
     //获取位置
+    void set_position(int x,int y) {
+        position.x = x, position.y = y;
+    }
+
+    //获取位置
     Vector2 get_position() {
         return position;
     }
@@ -146,8 +155,6 @@ protected:
     Vector2 size = Vector2(50, 50);				//大小
     Vector2 velocity = Vector2(0, 0);			//速度
     Vector2 position = Vector2(0, 0);			//位置
-    Vector2 window_position = Vector2(0, 0);	//窗口位置
-    Vector2 relevant_position = Vector2(0, 0);	//玩家相对窗口的位置
     SDL_Rect rect = {50,50};                    //图形显示矩形
     Window* window = nullptr;
     Vector2 face_direction = Vector2(0, 0);		//玩家面朝方向

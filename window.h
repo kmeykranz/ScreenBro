@@ -1,6 +1,9 @@
 #pragma once
 #include "constant.h"
 #include "vector2.h"
+#include "windows.h"
+#include <SDL_syswm.h> //用于窗口透明
+#include "SDL_ttf.h"
 
 class Window {
 public:
@@ -19,10 +22,10 @@ public:
 			SDL_Log("SDL_GetCurrentDisplayMode Error: %s\n", SDL_GetError());
 			return;
 		}
-		int screenWidth = displayMode.w;
-		int screenHeight = displayMode.h;
+		screenWidth = displayMode.w;
+		screenHeight = displayMode.h;
 
-		size = Vector2((float)screenWidth/2, (float)screenHeight/2);
+		size = Vector2((float)screenWidth, (float)screenHeight);
 
 		//窗口
 		window = SDL_CreateWindow(
@@ -40,6 +43,23 @@ public:
 			SDL_Log("Cannot create renderer,%s", SDL_GetError());
 			return;
 		}
+
+
+		// 使窗口始终置顶
+		SDL_SetWindowAlwaysOnTop(window, SDL_TRUE);
+		//设置透明
+		SetTransparent(window, RGB(0, 0, 0));
+
+
+		//SDL_IMG初始化
+		if (!IMG_Init(IMG_INIT_PNG)) {
+			SDL_Log("Cannot init img,%s", SDL_GetError());
+			return;
+		}
+
+		//SDL_TTF 初始化
+		TTF_Init();
+
 		return;
 	}
 
@@ -50,6 +70,8 @@ public:
 	void on_destroy() {
 		SDL_DestroyWindow(window);
 		SDL_DestroyRenderer(render);
+		IMG_Quit();
+		TTF_Quit();
 		SDL_Quit();
 		delete this;
 	}
@@ -64,6 +86,26 @@ public:
 	Vector2 get_size(){
 		return size;
 	}
+
+	int get_screen_width() {
+		return screenWidth;
+	}
+
+	int get_screen_height() {
+		return screenHeight;
+	}
+
+	void SetTransparent(SDL_Window* window, COLORREF colorKey) {
+		SDL_SysWMinfo wmInfo;
+		SDL_VERSION(&wmInfo.version);
+		SDL_GetWindowWMInfo(window, &wmInfo);
+
+		HWND hwnd = wmInfo.info.win.window;
+		LONG exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+		SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_LAYERED);
+		SetLayeredWindowAttributes(hwnd, colorKey, 0, LWA_COLORKEY);
+	}
+
 
 	SDL_Window* get_window() { return window; }
 	SDL_Renderer* get_render() { return render; }

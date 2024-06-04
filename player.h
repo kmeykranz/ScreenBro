@@ -64,29 +64,10 @@ public:
 
 	void on_update()
 	{
-		//玩家显示
-		relevant_position=position.operator-(window->get_position());
-		rect = { (int)relevant_position.x, (int)relevant_position.y, (int)size.x, (int)size.y };
+		//绘制玩家
+		rect = { (int)position.x, (int)position.y, (int)size.x, (int)size.y };
 		SDL_Point p{ 25,25 };
 		SDL_RenderCopyEx(window->get_render(), img_player, NULL, &rect, angle, &p, SDL_FLIP_NONE);
-
-		//窗口移动判断
-		if (relevant_position.x + size.x / 2 > window->get_size().x) {
-			window->on_move(window->get_size().x,0);
-			window->on_update();
-		}
-		else if (relevant_position.x + size.x / 2 < 0) {
-			window->on_move(-window->get_size().x,0);
-			window->on_update();
-		}
-		if (relevant_position.y + size.y / 2 > window->get_size().y) {
-			window->on_move(0, window->get_size().y);
-			window->on_update();
-		}
-		else if (relevant_position.y + size.y / 2 < 0) {
-			window->on_move(0, -window->get_size().y);
-			window->on_update();
-		}
 	}
 
 	void on_move(float speed,float delta)
@@ -141,8 +122,8 @@ public:
 		}
 
 		//墙体碰撞
-		if (position.x+size.x > 2 * window->get_size().x || position.x < 0)position.x = temp_x;
-		if (position.y+size.y > 2 * window->get_size().y || position.y < 0)position.y = temp_y;
+		if (position.x+size.x > window->get_size().x || position.x < 0)position.x = temp_x;
+		if (position.y+size.y > window->get_size().y || position.y < 0)position.y = temp_y;
 	}
 
 	//设置y移动方向
