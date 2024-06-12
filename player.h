@@ -122,8 +122,14 @@ public:
 		}
 
 		//墙体碰撞
-		if (position.x+size.x > window->get_size().x || position.x < 0)position.x = temp_x;
-		if (position.y+size.y > window->get_size().y || position.y < 0)position.y = temp_y;
+		if (get_right_border() > platform->get_right_border() ||
+			get_left_border() < platform->get_left_border()) {
+			position.x = temp_x;
+		}
+		if (get_down_border() > platform->get_down_border()
+			|| get_up_border() < platform->get_up_border()) {
+			position.y = temp_y;
+		}
 	}
 
 	//设置y移动方向
@@ -157,6 +163,27 @@ public:
 	bool get_can_shoot() {
 		return can_shoot;
 	}
+
+	//设置所在平台
+	void set_platform(Platform* plat) {
+		platform = plat;
+		platform->raise_window();
+	}
+	
+	bool change_platform(Platform* plat) {
+		//墙体碰撞
+		if (get_right_border() > plat->get_right_border() ||
+			get_left_border() < plat->get_left_border() ||
+			get_down_border() > plat->get_down_border() ||
+			get_up_border() < plat->get_up_border()) {
+			return false;
+		}
+		else { 
+			set_platform(plat);
+			return true;
+		}
+	}
+
 private:
-	bool can_shoot = 1;							//是否可以射击						
+	bool can_shoot = 1;							//是否可以射击	
 };

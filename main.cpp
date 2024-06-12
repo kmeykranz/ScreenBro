@@ -39,10 +39,10 @@ int main(int, char**) {
 	}
 
 	//释放
+	window->on_destroy();
 	resource_destroy();
 	menu_scene->on_destroy();
 	game_scene->on_destroy();
-	window->on_destroy();
 
 	return 0;
 }

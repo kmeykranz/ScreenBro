@@ -3,7 +3,7 @@
 #include "window.h"
 
 SDL_Texture *img_player=nullptr;
-SDL_Texture* img_enemy = nullptr;
+SDL_Texture* img_menu = nullptr;
 TTF_Font* font = nullptr;
 
 void resource_load(Window* win) {
@@ -12,13 +12,12 @@ void resource_load(Window* win) {
 	if (!font) { SDL_Log("font not loaded"); }
 	//玩家图像
 	img_player=IMG_LoadTexture(win->get_render(), "resource/blue.png");
-	if (img_player == NULL) {SDL_Log("Cannot load img_player,%s", SDL_GetError());}
-	img_enemy = IMG_LoadTexture(win->get_render(), "resource/red.png");
-	if (img_player == NULL) { SDL_Log("Cannot load img_enemy,%s", SDL_GetError()); }
+	//开始页面
+	img_menu= IMG_LoadTexture(win->get_render(), "resource/start_menu.png");
 }
 
 void resource_destroy() {
 	TTF_CloseFont(font);
 	SDL_DestroyTexture(img_player);
-	SDL_DestroyTexture(img_enemy);
+	SDL_DestroyTexture(img_menu);
 }

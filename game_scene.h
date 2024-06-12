@@ -10,6 +10,7 @@
 #include "scene_manager.h"
 #include <iostream>
 #include <string>
+#include "platform.h" //平台
 
 extern SceneManager scene_manager;
 extern TTF_Font *font;
@@ -26,6 +27,7 @@ public:
 		//数组初始化
 		std::fill(bullet, bullet + BULLET_MAX, nullptr);
 		std::fill(enemy, enemy + ENEMY_MAX, nullptr);
+		std::fill(platform, platform + PLATFORM_MAX, nullptr);
 
 		//随机数种子
 		srand((unsigned int)time(NULL));
@@ -47,16 +49,39 @@ public:
 		});
 
 		//射击间隔计时器
-		shoot_timer.set_wait_time(0.3);
+		shoot_timer.set_wait_time(0.1);
 		shoot_timer.set_callback([this]() {
 			this->player->set_can_shoot(true);
 		});
 
 		//敌人生成计时器
-		enemy_timer.set_wait_time(0.8);
+		enemy_timer.set_wait_time(1);
 		enemy_timer.set_callback([this](){
 			this->can_create_enemy = true;
 		});
+
+		//创建平台
+		platform[0] = new Platform();
+		platform[0]->set_size(500, 100);
+		platform[0]->on_create();
+
+		platform[1] = new Platform();
+		platform[1]->set_position(200, 400);
+		platform[1]->set_size(800, 300);
+		platform[1]->on_create();
+
+		platform[2] = new Platform();
+		platform[2]->set_position(500, 0);
+		platform[2]->set_size(100, 1000);
+		platform[2]->on_create();
+		/*for (int i = 0; i < 4; i++) {
+			platform[i] = new Platform();
+			platform[i]->set_position(200, 400);
+			platform[i]->set_size(800, 300);
+			platform[i]->on_create();
+		}*/
+
+		player->set_platform(platform[0]);
 	};
 
 	//更新循环
@@ -78,16 +103,23 @@ public:
 		SDL_SetRenderDrawBlendMode(window->get_render(), SDL_BLENDMODE_BLEND);
 		SDL_SetRenderDrawColor(window->get_render(), 0, 0, 0, SDL_ALPHA_TRANSPARENT);
 		SDL_RenderClear(window->get_render());
+		//背景色
+		SDL_SetRenderDrawBlendMode(platform[1]->get_render(), SDL_BLENDMODE_BLEND);
+		SDL_SetRenderDrawColor(platform[1]->get_render(), 255, 255, 255, 255);
+		SDL_RenderClear(platform[1]->get_render());
 		//子弹
 		BulletUpdate();
 		//敌人
 		EnemyUpdate();
+		//平台
+		platform[1]->on_update();
 		//玩家
 		player->on_update();
 		//文字
 		SDL_Rect time_rect = { 10,0,50,50 };
 		SDL_RenderCopy(window->get_render(), time_texture, NULL, &time_rect);
 		//生效
+		SDL_RenderPresent(platform[1]->get_render());
 		SDL_RenderPresent(window->get_render());
 	};
 
@@ -131,6 +163,15 @@ public:
 				case SDLK_ESCAPE:
 					scene_manager.switch_to(SceneManager::SceneType::Menu);
 					break;
+				case SDLK_k:
+					for (int i = 0; i < PLATFORM_MAX; i++) {
+						if (platform[i] != nullptr && platform[i] != player->get_platform()) {
+							if (player->change_platform(platform[i])) {
+								break;
+							}
+						}
+					}
+					break;
 				default:
 					break;
 				}
@@ -148,16 +189,27 @@ public:
 
 	//释放函数
 	void on_destroy() {
+		//玩家
 		player->on_destroy();
+		//计时器
 		SDL_DestroyTexture(time_texture);
+		//子弹清除
 		for (int i = 0; i < BULLET_MAX;i++) {
 			if (bullet[i] != nullptr) {
 				SDL_Log("[%d]Bullet Destroyed",i);
 				bullet[i]->on_destroy();
 			}
+		}
+		for (int i = 0; i < ENEMY_MAX; i++) {
 			if (enemy[i] != nullptr) {
 				SDL_Log("[%d]Enemy Destroyed", i);
 				enemy[i]->on_destroy();
+			}
+		}
+		for (int i = 0; i < PLATFORM_MAX; i++) {
+			if (platform[i] != nullptr) {
+				SDL_Log("[%d]Platform Destroyed", i);
+				platform[i]->on_destroy();
 			}
 		}
 		delete this;
@@ -172,27 +224,11 @@ public:
 			for (int i = 0; i < ENEMY_MAX; i++) {
 				if (enemy[i] == nullptr) {
 					SDL_Log("[%d]Enemy Created", i);
-					enemy[i] = new Enemy(window);
+					enemy[i] = new Enemy(platform[1], player);
+					//设置平台
+					enemy[i]->set_platform(platform[1]);
+					//创建敌人
 					enemy[i]->on_create();
-					//enemy[i]->set_position(0, 0);
-					//随机位置生成在地图边缘
-					int edge = rand() % 4;
-					switch (edge) {
-					case 0:	//上边
-						enemy[i]->set_position(rand () % window->get_screen_width(), 0);
-						break;
-					case 1: // 下边
-						enemy[i]->set_position(rand() % window->get_screen_width(),window->get_screen_height());
-						break;
-					case 2: // 左边
-						enemy[i]->set_position(0, (rand() % window->get_screen_height()));
-						break;
-					case 3: // 右边
-						enemy[i]->set_position(window->get_screen_width(),window->get_screen_height());
-						break;
-					default:
-						break;
-					}
 					break;
 				}
 			}
@@ -211,13 +247,8 @@ public:
 					SDL_Log("[%d]Enemy Destroyed", i);
 					continue;
 				}
-				//移动判断
-				if (enemy[i]->get_position().x > player->get_position().x + player->get_size().x/4) { enemy[i]->SetDirectionX(-1); }
-				else if (enemy[i]->get_position().x + enemy[i]->get_size().x/4 < player->get_position().x) { enemy[i]->SetDirectionX(1); }
-				else { enemy[i]->SetDirectionX(0); }
-				if (enemy[i]->get_position().y > player->get_position().y + player->get_size().y/4) { enemy[i]->SetDirectionY(-1); }
-				else if (enemy[i]->get_position().y + enemy[i]->get_size().y/4 < player->get_position().y) { enemy[i]->SetDirectionY(1); }
-				else{ enemy[i]->SetDirectionY(0); }
+				//敌人移动判断
+				enemy[i]->find_player();
 				//敌人物理逻辑
 				enemy[i]->PhysicsProcess(delta);
 				//敌人和敌人
@@ -303,6 +334,7 @@ public:
 private:
 	Window* window = nullptr;						//窗口指针
 	Player* player = nullptr;						//玩家指针
+	Platform* platform[PLATFORM_MAX] = { nullptr };
 	SDL_Texture* time_texture = nullptr;
 	const Uint8* keyboard_state_array = nullptr;	//键盘状态指针
 	Bullet* bullet[BULLET_MAX] = { nullptr };			//子弹指针数组

@@ -1,6 +1,7 @@
 #pragma once
 #include "constant.h"
 #include "window.h"
+#include "platform.h"
 
 //对象基类
 class Object
@@ -73,6 +74,9 @@ public:
             }
         }
 
+        //原先位置
+        int temp_x = position.x, temp_y = position.y;
+
         //移动计算
         if (direction.x && direction.y) {
             position.x += direction.x * velocity.x * 0.707;
@@ -83,6 +87,16 @@ public:
         }
         else if (direction.y) {
             position.y += velocity.y * direction.y;
+        }
+
+        //墙体碰撞
+        if (position.x + size.x > platform->get_position().x + platform->get_size().x ||
+            position.x < platform->get_position().x) {
+            position.x = temp_x;
+        }
+        if (position.y + size.y > platform->get_position().y + platform->get_size().y
+            || position.y < platform->get_position().y) {
+            position.y = temp_y;
         }
     }
 
@@ -139,17 +153,31 @@ public:
         state_time += delta;
     }
 
-    // 矩形碰撞检测
-    //bool CheckCollision(const Object& other) {
-    //    
-    //    if (position.x < other.position.x + other.m_width &&
-    //        position.x + m_width > other.position.x &&
-    //        position.y < other.position.y + other.m_height &&
-    //        position.y + m_height > other.position.y) {
-    //        return true; // 发生碰撞
-    //    }
-    //    return false; // 未发生碰撞
-    //}
+    //设置所在平台
+    void set_platform(Platform* plat) {
+        platform = plat;
+    }
+
+    Platform* get_platform() {
+        return platform;
+    }
+
+    //获取边界
+    int get_up_border() {
+        return position.y;
+    }
+
+    int get_down_border() {
+        return position.y + size.y;
+    }
+
+    int get_left_border() {
+        return position.x;
+    }
+
+    int get_right_border() {
+        return position.x + size.x;
+    }
 
 protected:
     Vector2 size = Vector2(50, 50);				//大小
@@ -160,6 +188,7 @@ protected:
     Vector2 face_direction = Vector2(0, 0);		//玩家面朝方向
     Vector2 direction = Vector2(0, 0);			//玩家移动方向
     float angle = 0;							//玩家图像面朝角度
+    Platform* platform=nullptr;
 
     //状态机
     State current_state=State::IDLE;

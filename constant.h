@@ -5,8 +5,9 @@
 #define SPEED 10.0
 #define ACCELERATION 30.0
 #define ENEMY_SPEED 5.0
-#define BULLET_MAX 20
-#define ENEMY_MAX 20
+#define BULLET_MAX 15
+#define ENEMY_MAX 15
+#define PLATFORM_MAX 5
 
 #include "SDL.h"
 #include "SDL_image.h"

@@ -54,5 +54,8 @@
     <ClInclude Include="scene_manager.h">
       <Filter>scene</Filter>
     </ClInclude>
+    <ClInclude Include="platform.h">
+      <Filter>core</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

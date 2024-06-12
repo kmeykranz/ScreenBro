@@ -3,6 +3,7 @@
 #include "scene_manager.h"
 
 extern SceneManager scene_manager;
+extern SDL_Texture *img_menu;
 
 class MenuScene :public Scene {
 public:
@@ -16,8 +17,11 @@ public:
 	};
 	void on_draw() {
 		//±³¾°É«
-		SDL_SetRenderDrawColor(window->get_render(), 255, 255, 255, 255);
+		SDL_SetRenderDrawColor(window->get_render(), 0, 0, 0, 255);
 		SDL_RenderClear(window->get_render());
+
+		SDL_Rect rect{0,0,window->get_size().x,window->get_size().y};
+		SDL_RenderCopy(window->get_render(), img_menu, 0, &rect);
 		SDL_RenderPresent(window->get_render());//ÉúĞ§
 	};
 	void on_input() {
