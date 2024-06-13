@@ -2,13 +2,16 @@
 #include "constant.h"
 #include "object.h"
 #include "vector2.h"
-
-extern SDL_Texture* img_player;
+#include "screen_window.h"
 
 class Player : public Object
 {
 public:
-	Player(Window* win) { window = win; };
+	bool is_player = 1;
+public:
+	Player(ScreenWindow* win) : window(win){ 
+		position = Vector2(50, 50);
+	};
 	~Player()=default;
 
 	void on_create(){
@@ -24,10 +27,10 @@ public:
 		// 每个状态的物理逻辑处理
 		switch (state) {
 		case State::IDLE:
-			on_move(0,delta);
+			Move(0,delta);
 			break;
 		case State::WALK:
-			on_move(SPEED,delta);
+			Move(SPEED,delta);
 			on_update();
 			break;
 		}
@@ -66,11 +69,11 @@ public:
 	{
 		//绘制玩家
 		rect = { (int)position.x, (int)position.y, (int)size.x, (int)size.y };
-		SDL_Point p{ 25,25 };
-		SDL_RenderCopyEx(window->get_render(), img_player, NULL, &rect, angle, &p, SDL_FLIP_NONE);
+		SDL_Point p{ size.x/2,size.y/2 };
+		SDL_RenderCopyEx(window->get_render(), window->img_player, NULL, &rect, angle, &p, SDL_FLIP_NONE);
 	}
 
-	void on_move(float speed,float delta)
+	void Move(float speed,float delta)
 	{
 		//加速度
 		if (speed == 0) {
@@ -122,12 +125,12 @@ public:
 		}
 
 		//墙体碰撞
-		if (get_right_border() > platform->get_right_border() ||
-			get_left_border() < platform->get_left_border()) {
+		if (border_right() > platform->border_right() ||
+			border_left() < platform->border_left()) {
 			position.x = temp_x;
 		}
-		if (get_down_border() > platform->get_down_border()
-			|| get_up_border() < platform->get_up_border()) {
+		if (border_down() > platform->border_down()
+			|| border_up() < platform->border_up()) {
 			position.y = temp_y;
 		}
 	}
@@ -172,10 +175,10 @@ public:
 	
 	bool change_platform(Platform* plat) {
 		//墙体碰撞
-		if (get_right_border() > plat->get_right_border() ||
-			get_left_border() < plat->get_left_border() ||
-			get_down_border() > plat->get_down_border() ||
-			get_up_border() < plat->get_up_border()) {
+		if (border_right() > plat->border_right() ||
+			border_left() < plat->border_left() ||
+			border_down() > plat->border_down() ||
+			border_up() < plat->border_up()) {
 			return false;
 		}
 		else { 
@@ -185,5 +188,6 @@ public:
 	}
 
 private:
-	bool can_shoot = 1;							//是否可以射击	
+	ScreenWindow* window=nullptr;
+	bool can_shoot = 1;							//是否可以射击
 };

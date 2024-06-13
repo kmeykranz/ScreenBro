@@ -143,15 +143,16 @@
   <ItemGroup>
     <ClInclude Include="bullet.h" />
     <ClInclude Include="constant.h" />
+    <ClInclude Include="core.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="game_scene.h" />
     <ClInclude Include="menu_scene.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="player.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="scene.h" />
     <ClInclude Include="scene_manager.h" />
+    <ClInclude Include="screen_window.h" />
     <ClInclude Include="timer.h" />
     <ClInclude Include="vector2.h" />
     <ClInclude Include="window.h" />

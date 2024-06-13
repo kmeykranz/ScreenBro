@@ -18,9 +18,6 @@
     <ClInclude Include="constant.h">
       <Filter>core</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>core</Filter>
-    </ClInclude>
     <ClInclude Include="timer.h">
       <Filter>core</Filter>
     </ClInclude>
@@ -55,6 +52,12 @@
       <Filter>scene</Filter>
     </ClInclude>
     <ClInclude Include="platform.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="core.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="screen_window.h">
       <Filter>core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -7,6 +7,12 @@
 class Object
 {
 public:
+    Vector2 size = Vector2(50, 50);				//大小
+    Vector2 velocity = Vector2(0, 0);			//速度
+    Vector2 position = Vector2(0, 0);			//位置
+    SDL_Rect rect = { 0 };                    //图形显示矩形
+    bool is_player = 0;
+public:
     enum class State {
         IDLE,
         WALK,
@@ -38,7 +44,7 @@ public:
         delete this;
     }
 
-    void on_move(float speed, float delta)
+    void Move(float speed, float delta)
     {
         //加速度
         if (speed == 0) {
@@ -158,32 +164,29 @@ public:
         platform = plat;
     }
 
-    Platform* get_platform() {
+    //获取所在平台
+    Platform* get_platform(){
         return platform;
     }
 
     //获取边界
-    int get_up_border() {
+    int border_up() const{
         return position.y;
     }
 
-    int get_down_border() {
+    int border_down() const{
         return position.y + size.y;
     }
 
-    int get_left_border() {
+    int border_left() const{
         return position.x;
     }
 
-    int get_right_border() {
+    int border_right() const {
         return position.x + size.x;
     }
 
 protected:
-    Vector2 size = Vector2(50, 50);				//大小
-    Vector2 velocity = Vector2(0, 0);			//速度
-    Vector2 position = Vector2(0, 0);			//位置
-    SDL_Rect rect = {50,50};                    //图形显示矩形
     Window* window = nullptr;
     Vector2 face_direction = Vector2(0, 0);		//玩家面朝方向
     Vector2 direction = Vector2(0, 0);			//玩家移动方向
@@ -193,6 +196,7 @@ protected:
     //状态机
     State current_state=State::IDLE;
     float state_time=0;
+
     //状态的物理逻辑
     virtual void tick_physics(State state, float delta) { return; }
     // 获取下一个状态的逻辑

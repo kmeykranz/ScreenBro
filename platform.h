@@ -1,9 +1,12 @@
 #pragma once
-#pragma once
 #include "constant.h"
 #include "vector2.h"
 
 class Platform {
+public:
+	Vector2 size = Vector2(0, 0);
+	Vector2 position = Vector2(0, 0);
+	SDL_Rect rect = { 0 };
 public:
 	Platform() {
 		//获取屏幕大小
@@ -17,7 +20,9 @@ public:
 
 		size = Vector2((float)screenWidth / 5, (float)screenHeight / 5);
 	};
+
 	~Platform() = default;
+
 	void on_create() {
 		//窗口
 		window = SDL_CreateWindow(
@@ -36,11 +41,21 @@ public:
 			return;
 		}
 
-		//加载资源
-		//玩家图像
+		//资源加载
 		img_enemy = IMG_LoadTexture(render, "resource/red.png");
+		img_player = IMG_LoadTexture(render, "resource/blue.png");
+		if (img_player == nullptr) { SDL_Log("img_player is null"); };
 
 		return;
+	}
+
+	void on_destroy() {
+		SDL_DestroyWindow(window);
+		SDL_DestroyRenderer(render);
+
+		SDL_DestroyTexture(img_enemy);
+		SDL_DestroyTexture(img_player);
+		delete this;
 	}
 	
 	void raise_window() {
@@ -52,12 +67,10 @@ public:
 		SDL_SetWindowSize(window, size.x, size.y);
 	}
 
-	void on_destroy() {
-		SDL_DestroyWindow(window);
-		SDL_DestroyRenderer(render);
-
-		SDL_DestroyTexture(img_enemy);
-		delete this;
+	void on_draw() {
+		SDL_SetRenderDrawBlendMode(render, SDL_BLENDMODE_BLEND);
+		SDL_SetRenderDrawColor(render, 255, 255, 200, 255);
+		SDL_RenderClear(render);
 	}
 
 	void set_position(float x, float y) {
@@ -68,6 +81,8 @@ public:
 	void set_size(float x, float y) {
 		size.x += x;
 		size.y += y;
+
+		rect = { (int)position.x,(int)position.y,(int)size.x,(int)size.y };
 	}
 
 	Vector2 get_position() {
@@ -86,19 +101,19 @@ public:
 	}
 
 	//获取边界
-	int get_up_border() {
+	int border_up() const{
 		return position.y;
 	}
 
-	int get_down_border() {
+	int border_down() const{
 		return position.y + size.y;
 	}
 
-	int get_left_border() {
+	int border_left() const{
 		return position.x;
 	}
 
-	int get_right_border() {
+	int border_right() const{
 		return position.x + size.x;
 	}
 
@@ -108,11 +123,10 @@ public:
 public:
 	//资源指针
 	SDL_Texture* img_enemy = nullptr;
+	SDL_Texture* img_player = nullptr;
 private:
 	SDL_Window* window=nullptr;
 	SDL_Renderer* render = nullptr;
-	Vector2 size = Vector2(0, 0);
-	Vector2 position = Vector2(0, 0);
 	int screenWidth=0;
 	int screenHeight=0;
 };

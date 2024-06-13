@@ -3,27 +3,35 @@
 #include "scene_manager.h"
 
 extern SceneManager scene_manager;
-extern SDL_Texture *img_menu;
 
 class MenuScene :public Scene {
 public:
-	MenuScene(Window* win) :window(win) {}
+	MenuScene() {
+		window = new Window();
+		//资源加载
+		img_menu = IMG_LoadTexture(window->get_render(), "resource/start_menu.png");
+	};
+
 	~MenuScene() = default;
 
 	void on_enter() {
-		SDL_Log("Enter Menu Scene");
+		SDL_Log("[Game Scene] -> Menu Scene");
+		SDL_ShowWindow(window->get_window());
 	};
+
+	void on_exit() {
+		SDL_HideWindow(window->get_window());
+	}
+
 	void on_update() {
 	};
-	void on_draw() {
-		//背景色
-		SDL_SetRenderDrawColor(window->get_render(), 0, 0, 0, 255);
-		SDL_RenderClear(window->get_render());
 
+	void on_draw() {
 		SDL_Rect rect{0,0,window->get_size().x,window->get_size().y};
 		SDL_RenderCopy(window->get_render(), img_menu, 0, &rect);
 		SDL_RenderPresent(window->get_render());//生效
 	};
+
 	void on_input() {
 		//事件
 		SDL_Event event;
@@ -46,12 +54,14 @@ public:
 			}
 		}
 	};
-	void on_exit() {
-		return;
-	};
+
 	void on_destroy() {
+		SDL_HideWindow(window->get_window());
+		SDL_DestroyTexture(img_menu);
 		delete this;
 	}
+
 private:
 	Window* window = nullptr;
+	SDL_Texture* img_menu;
 };

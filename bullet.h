@@ -1,14 +1,14 @@
 #pragma once
 #include "vector2.h"
 #include <functional>
-#include "window.h"
+#include "screen_window.h"
 #include "constant.h"
 
-extern SDL_Texture* img_player;
-
-class Bullet {
+class Bullet:public Object {
 public:
-	Bullet(Window* win,int i) :window(win), number(i)  {}
+	SDL_Rect rect = {0,0,0,0};
+public:
+	Bullet(Platform* plat,Vector2 pos,Vector2 dir) :platform(plat),position(pos),direction(dir)  {}
 	~Bullet() = default;
 
 	void set_position(Vector2 pos) {
@@ -20,13 +20,14 @@ public:
 	}
 
 	void on_update() {
-		position = position.operator-(window->get_position());
 		position.operator+=(direction.operator*(20));	//20是速度
+		relative_position = position.operator-(platform->get_position());
 		rect = { (int)position.x, (int)position.y, (int)size.x, (int)size.y };
-		SDL_RenderCopy(window->get_render(), img_player, NULL, &rect);
+		SDL_Rect draw_rect = { (int)relative_position.x, (int)relative_position.y, (int)size.x, (int)size.y };
+		SDL_RenderCopy(platform->get_render(), platform->img_player, NULL, &draw_rect);
 
-		if (position.x + size.x > 2 * window->get_size().x || position.x < 0)can_remove=1;
-		if (position.y + size.y > 2 * window->get_size().y || position.y < 0)can_remove=1;
+		if (position.x + size.x > platform->border_right() || position.x < platform->border_left())can_remove = 1;
+		if (position.y + size.y > platform->border_down() || position.y < platform->border_up())can_remove=1;
 	}
 
 
@@ -47,19 +48,13 @@ public:
 		return position;
 	}
 
-	//获取在数组中的序号
-	int get_number() {
-		return number;
-	}
-
 private:
 	Vector2 position = Vector2(200,200);		//子弹位置
+	Vector2 relative_position= Vector2(0, 0);
 	Vector2 direction = Vector2(0, 0);			//子弹方向
 	Vector2 size = Vector2(20, 20);				//子弹大小
 	int damage = 10;
 	bool valid = true;
 	bool can_remove = false;
-	Window* window;
-	SDL_Rect rect = {};
-	int number=0; //在数组中的序号
+	Platform* platform=nullptr;
 };

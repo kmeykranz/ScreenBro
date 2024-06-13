@@ -2,7 +2,6 @@
 #include "game_scene.h"
 #include "menu_scene.h"
 #include "window.h"
-#include "resource.h"
 
 Window *window;
 
@@ -11,13 +10,32 @@ Scene* game_scene = nullptr;
 
 SceneManager scene_manager;
 
-int main(int, char**) {
-	window = new Window();
-	window->on_create();
-	resource_load(window);
+void Init() {
+	//SDL初始化
+	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+		SDL_Log("Init failed, %s", SDL_GetError());
+		return;
+	}
+	//SDL_IMG初始化
+	if (!IMG_Init(IMG_INIT_PNG)) {
+		SDL_Log("Cannot init img,%s", SDL_GetError());
+		return;
+	}
+	//SDL_TTF 初始化
+	TTF_Init();
+}
 
-	menu_scene = new MenuScene(window);
-	game_scene = new GameScene(window);
+void Quit() {
+	IMG_Quit();
+	TTF_Quit();
+	SDL_Quit();
+}
+
+int main(int, char**) {
+	Init();
+
+	menu_scene = new MenuScene();
+	game_scene = new GameScene();
 	scene_manager.set_current_scene(menu_scene);
 
 	while (scene_manager.is_running())
@@ -39,10 +57,9 @@ int main(int, char**) {
 	}
 
 	//释放
-	window->on_destroy();
-	resource_destroy();
 	menu_scene->on_destroy();
 	game_scene->on_destroy();
+	Quit();
 
 	return 0;
 }

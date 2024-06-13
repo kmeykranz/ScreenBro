@@ -9,13 +9,57 @@ extern SDL_Texture* img_enemy;
 class Enemy : public Object
 {
 public:
-	Enemy(Platform* win, Player* play):window(win),player(play){}
+	Enemy(Platform* plat,Player* play):platform(plat),player(play){
+		random_position();
+	}
+
 	~Enemy() = default;
 
 	//物理逻辑
 	void tick_physics(State state, float delta) {
-		on_move(ENEMY_SPEED,delta);
+		Move(ENEMY_SPEED,delta);
 		return;
+	}
+
+	void Move(float speed, float delta)
+	{
+		//加速度
+		if (speed == 0) {
+			velocity = Vector2(0, 0);
+		}
+		else {
+			if (velocity.x < speed) {
+				velocity.x += ACCELERATION * delta;
+			}
+			if (velocity.y < speed) {
+				velocity.y += ACCELERATION * delta;
+			}
+		}
+
+		//原先位置
+		int temp_x = position.x, temp_y = position.y;
+
+		//移动计算
+		if (direction.x && direction.y) {
+			position.x += direction.x * velocity.x * 0.707;
+			position.y += direction.y * velocity.y * 0.707;
+		}
+		else if (direction.x) {
+			position.x += velocity.x * direction.x;
+		}
+		else if (direction.y) {
+			position.y += velocity.y * direction.y;
+		}
+
+		//墙体碰撞
+		if (position.x + size.x > platform->get_position().x + platform->get_size().x ||
+			position.x < platform->get_position().x) {
+			position.x = temp_x;
+		}
+		if (position.y + size.y > platform->get_position().y + platform->get_size().y
+			|| position.y < platform->get_position().y) {
+			position.y = temp_y;
+		}
 	}
 
 	void set_position(Vector2 pos) {
@@ -35,24 +79,7 @@ public:
 	}
 
 	void on_create() {
-		//随机位置生成在地图边缘
-		int edge = rand() % 4;
-		switch (edge) {
-		case 0:	//上边
-			set_position(platform->get_left_border()+rand() %(int)platform->get_size().x, platform->get_up_border());
-			break;
-		case 1: // 下边
-			set_position(platform->get_left_border() + rand() % (int)platform->get_size().x, platform->get_down_border());
-			break;
-		case 2: // 左边
-			set_position(platform->get_left_border(), platform->get_up_border() + rand() % (int)platform->get_size().y);
-			break;
-		case 3: // 右边
-			set_position(platform->get_right_border(), platform->get_up_border() + rand() % (int)platform->get_size().y);
-			break;
-		default:
-			break;
-		}
+		
 	}
 
 	void find_player() {
@@ -73,11 +100,12 @@ public:
 	}
 
 	void on_update() {
-		int rel_position_x = position.x - window->get_left_border();
-		int rel_position_y = position.y - window->get_up_border();
+		rect = { (int)position.x,(int)position.y,50,50 };
+		int rel_position_x = position.x - platform->border_left();
+		int rel_position_y = position.y - platform->border_up();
 		//显示
-		rect = { rel_position_x, rel_position_y, (int)size.x, (int)size.y };
-		SDL_RenderCopy(platform->get_render(), platform->img_enemy, NULL, &rect);
+		SDL_Rect show_rect = { rel_position_x, rel_position_y, (int)size.x, (int)size.y };
+		SDL_RenderCopy(platform->get_render(), platform->img_enemy, NULL, &show_rect);
 	}
 
 	void on_exit() {}
@@ -94,99 +122,35 @@ public:
 		return can_remove;
 	}
 
-	//获取在数组中的序号
-	int get_number() {
-		return number;
+	Platform* get_platform(){
+		return platform;
 	}
 
-	//检查敌人与敌人碰撞
-	bool check_collision(Object* ob) {
-		if (position.x+size.x >= ob->get_position().x &&
-			position.x <= ob->get_position().x + ob->get_size().x &&
-			position.y+size.y >= ob->get_position().y &&
-			position.y <= ob->get_position().y + ob->get_size().y)
-		{
-			return true;
-		}
-		return false;
-	}
-
-	// 处理碰撞（敌人&敌人）
-	void handle_collision(Enemy* ob) {
-		//原先位置
-		int temp_x = position.x, temp_y = position.y;
-		int ob_temp_x = ob->get_position().x, ob_temp_y = ob->get_position().y;
-
-		// 计算分离向量
-		float dx = position.x - ob->get_position().x;
-		float dy = position.y - ob->get_position().y;
-		float distance = sqrt(dx * dx + dy * dy);
-
-		if (distance == 0.0f) {
-			distance = 1.0f; // 避免除以0
-		}
-
-		float overlap = (size.x/2 + ob->get_size().x/2) - distance;
-
-		// 按比例分离两个敌人
-		position.x += (dx / distance) * (overlap / 2);
-		position.y += (dy / distance) * (overlap / 2);
-		ob->set_position(ob->get_position().x - (dx / distance) * (overlap / 2), ob->get_position().y - (dy / distance) * (overlap / 2));
-
-		//墙体碰撞
-		if (get_right_border() > platform->get_right_border() ||
-			get_left_border() < platform->get_left_border()) {
-			position.x = temp_x;
-		}
-		if (get_down_border() > platform->get_down_border()
-			|| get_up_border() < platform->get_up_border()) {
-			position.y = temp_y;
-		}
-		//另一个敌人墙体碰撞
-		if (ob->get_right_border() > platform->get_right_border() ||
-		 ob->get_left_border() < platform->get_left_border()) {
-			ob->set_position_x(ob_temp_x);
-		}
-		if (ob->get_down_border() > platform->get_down_border()
-			||  ob->get_up_border()< platform->get_up_border()) {
-			ob->set_position_y(ob_temp_y);
-		}
-	}
-
-	// 处理碰撞（敌人&玩家）
-	void handle_collision(Player* ob) {
-		//原先位置
-		int temp_x = position.x, temp_y = position.y;
-
-		// 计算分离向量
-		float dx = position.x - ob->get_position().x;
-		float dy = position.y - ob->get_position().y;
-		float distance = sqrt(dx * dx + dy * dy);
-
-		if (distance == 0.0f) {
-			distance = 1.0f; // 避免除以0
-		}
-
-		float overlap = (size.x / 2 + ob->get_size().x / 2) - distance;
-
-		// 按比例分离玩家和敌人
-		position.x += (dx / distance) * (overlap);
-		position.y += (dy / distance) * (overlap);
-		//ob->set_position(ob->get_position().x - (dx / distance) * (overlap / 2), ob->get_position().y - (dy / distance) * (overlap / 2));
-
-		//墙体碰撞
-		if (position.x + size.x > platform->get_position().x + platform->get_size().x ||
-			position.x < platform->get_position().x) {
-			position.x = temp_x;
-		}
-		if (position.y + size.y > platform->get_position().y + platform->get_size().y
-			|| position.y < platform->get_position().y) {
-			position.y = temp_y;
+private:
+	//随机位置
+	void random_position() {
+		//随机位置生成在地图边缘
+		int edge = rand() % 4;
+		switch (edge) {
+		case 0:	//上边
+			set_position(platform->border_left() + rand() % (int)platform->get_size().x, platform->border_up());
+			break;
+		case 1: // 下边
+			set_position(platform->border_left() + rand() % (int)platform->get_size().x, platform->border_down());
+			break;
+		case 2: // 左边
+			set_position(platform->border_left(), platform->border_up() + rand() % (int)platform->get_size().y);
+			break;
+		case 3: // 右边
+			set_position(platform->border_right(), platform->border_up() + rand() % (int)platform->get_size().y);
+			break;
+		default:
+			break;
 		}
 	}
 
 private:
-	Platform* window = nullptr;
+	Platform* platform = nullptr;
 	Player* player = nullptr;
 	int number=0; //在数组中的序号
 	bool can_remove = false;
