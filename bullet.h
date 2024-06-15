@@ -8,11 +8,13 @@ class Bullet:public Object {
 public:
 	SDL_Rect rect = {0,0,0,0};
 public:
-	Bullet(Platform* plat,Vector2 pos,Vector2 dir) :platform(plat),position(pos),direction(dir)  {}
+	Bullet(Platform* plat,Vector2 pos,Vector2 dir) :platform(plat),position(pos),direction(dir)  {
+		position = pos.operator+(15);
+	}
 	~Bullet() = default;
 
 	void set_position(Vector2 pos) {
-		position = pos.operator+(15);
+		
 	}
 
 	void set_direction(Vector2 dir) {
